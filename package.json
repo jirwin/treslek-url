@@ -1,0 +1,30 @@
+{
+  "name": "treslek-url",
+  "version": "0.0.0",
+  "description": "A treslek plugin that grabs and parses metadata from URIs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jirwin/treslek-url.git"
+  },
+  "keywords": [
+    "treslek",
+    "irc"
+  ],
+  "author": "Justin Gallardo <justin.gallardo@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jirwin/treslek-url/issues"
+  },
+  "homepage": "https://github.com/jirwin/treslek-url",
+  "dependencies": {
+    "async": "^0.9.0",
+    "bitly": "^1.2.5",
+    "cheerio": "^0.18.0",
+    "logmagic": "^0.1.4",
+    "request": "^2.47.0"
+  }
+}
