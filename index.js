@@ -1,3 +1,6 @@
+var util = require('util');
+var urlLib = require('url');
+
 var async = require('async');
 var request = require('request');
 var cheerio = require('cheerio');
@@ -6,19 +9,24 @@ var Bitly = require('bitly');
 var log = require('logmagic').local('treslek.plugins.url');
 var config = require('./config.json');
 
+
+request = request.defaults({
+  sendImmediately: true,
+  timeout: 10000,
+  headers: {
+    "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36"
+  }
+});
+
+
 /*
  * URL plugin
  *   - creates a hook that checks for urls. It then grabs the title
  *     and outputs that to the channel.
+ *   Thanks to https://github.com/Floobits/floobot for scraping logic
  */
 var Url = function() {
   this.hooks = ['url'];
-
-  // Enable bitly shortification by adding credentials here
-  this.bitly = {
-    user: '',
-    apiKey: '',
-  };
 };
 
 
@@ -41,6 +49,42 @@ var shortenUrl = function(bitly, url, callback) {
     callback(null, resp.data.url || url);
   });
 };
+
+
+function parseYoutube(path, parsed) {
+  var title, views, likes, dislikes, rating;
+
+  if (path.match(/^\/watch/) === null) {
+    return;
+  }
+
+  title = parsed('#eow-title').text().replace(/\n/g, '').replace(/^\s+/, '').replace(/\s+$/, '');
+  views = parsed('#watch7-views-info > div.watch-view-count').text().replace(/[\s]/g, '') || 0;
+  likes = parsed('#watch-like > span.yt-uix-button-content').text().replace(/[\s,]/g, '') || 0;
+  dislikes = parsed('#watch-dislike > span.yt-uix-button-content').text().replace(/[\s,]/g, '') || 0;
+  likes = parseInt(likes, 10);
+  dislikes = parseInt(dislikes, 10);
+  console.log(likes, dislikes);
+  rating = Math.round(100 * likes / (likes + dislikes));
+
+  return util.format("%s | %s views %s%% like", title, views, rating);
+}
+
+
+function parseTwitter(path, parsed) {
+  var user, title, retweets, favorites;
+
+  if (path.match("^\\/\\w+\\/status\\/\\d+") === null) {
+    return;
+  }
+
+  user = parsed("div.permalink-tweet-container div.permalink-header a > span.username.js-action-profile-name > b").text();
+  title = parsed("div.permalink-tweet-container p.tweet-text").text().replace(/\n/g, '').replace(/^\s+/, '').replace(/\s+$/, '');
+  retweets = parsed("div.tweet-stats-container > ul.stats > li.js-stat-count.js-stat-retweets.stat-count > a > strong").text().replace(/\s/g, "") || 0;
+  favorites = parsed("div.tweet-stats-container > ul.stats > li.js-stat-count.js-stat-favorites.stat-count > a > strong").text().replace(/\s/g, "") || 0;
+
+  return util.format("<@%s> %s (%s retweets, %s favorites)", user, title, retweets, favorites);
+}
 
 
 /*
@@ -68,6 +112,7 @@ Url.prototype.url = function(bot, to, from, msg, callback) {
     request(url, function(err, res, body) {
       var response,
           parsed,
+          parsedUrl,
           title,
           contentType;
 
@@ -96,7 +141,15 @@ Url.prototype.url = function(bot, to, from, msg, callback) {
       title = title || contentType;
 
       shortenUrl(bitly, url, function(err, shortUrl) {
-        response = title + ' | ' + shortUrl;
+        parsedUrl = urlLib.parse(url);
+        domain = parsedUrl.hostname.split('.').slice(-2).join('.');
+        if (domain === 'youtube.com') {
+          response = parseYoutube(parsedUrl.path, parsed) + ' | ' + shortUrl;
+        } else if (domain === 'twitter.com') {
+          response = parseTwitter(parsedUrl.path, parsed) + ' | ' + shortUrl;
+        } else {
+          response = title + ' | ' + shortUrl;
+        }
         bot.say(to, response);
         callback();
       });
