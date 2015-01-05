@@ -87,6 +87,21 @@ function parseTwitter(path, parsed) {
 }
 
 
+function parseReddit(path, parsed) {
+  var rating, title, score, comments;
+
+  if (path.match('^\\/r\\/\\w+\\/comments') === null) {
+    return;
+  }
+
+  title = parsed('p.title > a.title').text().replace(/\n/g, ' ').replace(/^\s+/, '').replace(/\s+$/, '');
+  score = parsed('div.score > span.number').text();
+  comments = parsed('div.entry > ul.flat-list > li.first > a.comments').text();
+
+  return util.format('%s (%s upvotes, %s)', title, score, comments);
+}
+
+
 /*
  * URL hook.
  *   Searchs a message for any urls, and then request each url.
@@ -147,7 +162,11 @@ Url.prototype.url = function(bot, to, from, msg, callback) {
           response = parseYoutube(parsedUrl.path, parsed) + ' | ' + shortUrl;
         } else if (domain === 'twitter.com') {
           response = parseTwitter(parsedUrl.path, parsed) + ' | ' + shortUrl;
-        } else {
+        } else if (domain === 'reddit.com') {
+          response = parseReddit(parsedUrl.path, parsed) + ' | ' + shortUrl;
+        }
+
+        if (!response) {
           response = title + ' | ' + shortUrl;
         }
         bot.say(to, response);
