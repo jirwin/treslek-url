@@ -58,7 +58,7 @@ function parseYoutube(path, parsed) {
     return;
   }
 
-  title = parsed('#eow-title').text().replace(/\n/g, '').replace(/^\s+/, '').replace(/\s+$/, '');
+  title = parsed('#eow-title').text().replace(/\n/g, ' ').replace(/^\s+/, '').replace(/\s+$/, '');
   views = parsed('#watch7-views-info > div.watch-view-count').text().replace(/[\s]/g, '') || 0;
   likes = parsed('#watch-like > span.yt-uix-button-content').text().replace(/[\s,]/g, '') || 0;
   dislikes = parsed('#watch-dislike > span.yt-uix-button-content').text().replace(/[\s,]/g, '') || 0;
@@ -79,7 +79,7 @@ function parseTwitter(path, parsed) {
   }
 
   user = parsed("div.permalink-tweet-container div.permalink-header a > span.username.js-action-profile-name > b").text();
-  title = parsed("div.permalink-tweet-container p.tweet-text").text().replace(/\n/g, '').replace(/^\s+/, '').replace(/\s+$/, '');
+  title = parsed("div.permalink-tweet-container p.tweet-text").text().replace(/\n/g, ' ').replace(/^\s+/, '').replace(/\s+$/, '');
   retweets = parsed("div.tweet-stats-container > ul.stats > li.js-stat-count.js-stat-retweets.stat-count > a > strong").text().replace(/\s/g, "") || 0;
   favorites = parsed("div.tweet-stats-container > ul.stats > li.js-stat-count.js-stat-favorites.stat-count > a > strong").text().replace(/\s/g, "") || 0;
 
@@ -134,7 +134,7 @@ Url.prototype.url = function(bot, to, from, msg, callback) {
           title = contentType;
         } else {
           parsed = cheerio.load(body);
-          title = parsed('title').text().replace(/\n/g, '').replace(/^\s+/, '');
+          title = parsed('title').text().replace(/\n/g, ' ').replace(/^\s+/, '');
         }
       }
 
