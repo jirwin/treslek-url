@@ -155,8 +155,14 @@ Url.prototype.url = function(bot, to, from, msg, callback) {
 
       title = title || contentType;
 
+      // Strip auth from parsed URL before
+      parsedUrl = urlLib.parse(url);
+      if (parsedUrl.auth) {
+        delete parsedUrl.auth;
+      }
+      url = urlLib.format(parsedUrl);
+
       shortenUrl(bitly, url, function(err, shortUrl) {
-        parsedUrl = urlLib.parse(url);
         domain = parsedUrl.hostname.split('.').slice(-2).join('.');
         if (domain === 'youtube.com') {
           response = parseYoutube(parsedUrl.path, parsed) + ' | ' + shortUrl;
