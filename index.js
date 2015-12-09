@@ -173,7 +173,11 @@ Url.prototype.url = function(bot, to, from, msg, callback) {
         }
 
         if (!response) {
-          response = title + ' | ' + shortUrl;
+          if (typeof title == 'undefined') {
+            response = parsedUrl.hostname + ' | ' + shortUrl;
+          } else {
+            response = title + ' | ' + shortUrl;
+          }
         }
         bot.say(to, response);
         callback();
