@@ -149,7 +149,7 @@ Url.prototype.url = function(bot, to, from, msg, callback) {
           title = contentType;
         } else {
           parsed = cheerio.load(body);
-          title = parsed('title').text().replace(/\n/g, ' ').replace(/^\s+/, '');
+          title = parsed('title').eq(0).text().replace(/\n/g, ' ').replace(/^\s+/, '');
         }
       }
 
