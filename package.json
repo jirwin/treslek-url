@@ -1,6 +1,6 @@
 {
   "name": "treslek-url",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "A treslek plugin that grabs and parses metadata from URIs",
   "main": "index.js",
   "scripts": {
